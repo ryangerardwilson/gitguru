@@ -1,0 +1,7 @@
+*.log
+*.swp
+*.sql
+**/__pycache__
+debian/version_build_folders/*
+debian/version_debs/*
+debian/dists/*
