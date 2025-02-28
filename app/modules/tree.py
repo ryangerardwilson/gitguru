@@ -62,7 +62,7 @@ def build_branch_tree(branches, current_branch, log_lines):
 
 def display_tree(git_dir=".", label="Current State"):
     """Display the Git branch tree with a custom label."""
-    print(f"{HEADING_COLOR}Visualizing Git branches for {git_dir} ({label})...{RESET_COLOR}")
+    # print(f"{HEADING_COLOR}Visualizing Git branches for {git_dir} ({label})...{RESET_COLOR}")
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, "Fetching branches"))
     animation_thread.start()

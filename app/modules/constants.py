@@ -6,7 +6,7 @@ CONTENT_COLOR = '\033[94m'  # Bright blue for content
 RESET_COLOR = '\033[0m'     # Reset to default
 
 # Version
-VERSION = "0.0.32-1"  # Initial version, will be updated by publish.py
+VERSION = "0.0.33-1"  # Initial version, will be updated by publish.py
 
 # ASCII art banner
 GITGURU_BANNER = r"""
