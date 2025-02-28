@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import subprocess
 from .constants import HEADING_COLOR, CONTENT_COLOR, RESET_COLOR, VALID_TYPES, BRANCH_PATTERN
 from .git_utils import run_git_command
 from .ui import animate_loading
@@ -117,7 +118,7 @@ def commit_changes(message):
     display_tree(".", "After Commit")
 
 def push_branch():
-    """Push the current branch to origin."""
+    """Push the current branch to origin, staging and committing changes automatically."""
     current_branch = run_git_command(["git", "rev-parse", "--abbrev-ref", "HEAD"], "Failed to get current branch").strip()
     validate_branch_name(current_branch)
     
@@ -125,12 +126,43 @@ def push_branch():
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Pushing {current_branch} to origin"))
     animation_thread.start()
 
-    run_git_command(["git", "push", "origin", current_branch], f"Failed to push {current_branch}")
+    # Stage all changes
+    run_git_command(["git", "add", "."], "Failed to stage changes")
+
+    # Check if there are changes to commit
+    status_output = subprocess.run(["git", "status", "--porcelain"], text=True, capture_output=True).stdout
+    if status_output.strip():
+        # Commit with default "sync" message if there are changes
+        run_git_command(["git", "commit", "-m", "sync"], "Failed to commit changes")
+        print(f"{CONTENT_COLOR}Staged and committed changes with message 'sync'.{RESET_COLOR}")
+    else:
+        print(f"{CONTENT_COLOR}No changes to commit.{RESET_COLOR}")
+
+    # Check if a remote 'origin' exists
+    try:
+        remotes = run_git_command(["git", "remote"], "Failed to list remotes").strip()
+        if "origin" not in remotes.splitlines():
+            stop_event.set()
+            animation_thread.join()
+            print(f"{HEADING_COLOR}Error: No remote 'origin' configured. Please set up a remote repository first (e.g., 'git remote add origin <url>').{RESET_COLOR}")
+            display_tree(".", "Current State")
+            sys.exit(1)
+
+        # Push to origin
+        run_git_command(["git", "push", "origin", current_branch], f"Failed to push {current_branch}")
+    
+    except subprocess.CalledProcessError as e:
+        stop_event.set()
+        animation_thread.join()
+        print(f"{HEADING_COLOR}Error: Push failed: {e.stderr}{RESET_COLOR}")
+        display_tree(".", "Current State")
+        sys.exit(1)
 
     stop_event.set()
     animation_thread.join()
     print(f"{CONTENT_COLOR}Pushed '{current_branch}' to origin successfully.{RESET_COLOR}")
     display_tree(".", "After Push")
+
 
 def switch_branch(branch):
     """Switch to an existing branch."""
