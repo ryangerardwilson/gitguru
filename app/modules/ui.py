@@ -26,6 +26,8 @@ def display_commands(script_path):
     print(f"{CONTENT_COLOR}  push                                       Push current branch to origin{RESET_COLOR}")
     print(f"{CONTENT_COLOR}  switch <branch>                            Switch to a branch{RESET_COLOR}")
     print(f"{CONTENT_COLOR}  delete <branch1> [branch2] ... [--force]   Delete one or more branches (use --force for unmerged branches){RESET_COLOR}")
+    print(f"{CONTENT_COLOR}  cto-hotfix <version>                       Quickly get the CTO working on a hotfix branch{RESET_COLOR}")
+    print(f"{CONTENT_COLOR}  cto-hotfix-push <version>                  Merge and push the hotfix to main{RESET_COLOR}")
     print(f"{HEADING_COLOR}Examples:{RESET_COLOR}")
     print(f"{CONTENT_COLOR}  {script_path} init /path/to/repo{RESET_COLOR}")
     print(f"{CONTENT_COLOR}  {script_path} view /path/to/repo{RESET_COLOR}")
