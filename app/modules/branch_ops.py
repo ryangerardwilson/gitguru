@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import threading
 import subprocess
@@ -41,7 +42,7 @@ def init_git_repo(git_dir="."):
     display_tree(git_dir, "After Initialization")
 
 def create_new_branch(version, owner, branch_type, description=None):
-    """Create a new branch, requiring base release branch to exist."""
+    """Create a new branch, requiring base release branch to exist unless it's a hotfix."""
     if branch_type not in VALID_TYPES:
         print(f"{HEADING_COLOR}Error: Invalid type '{branch_type}'. Must be one of: feature, bugfix, hotfix, release.{RESET_COLOR}")
         sys.exit(1)
@@ -56,7 +57,8 @@ def create_new_branch(version, owner, branch_type, description=None):
         sys.exit(1)
 
     branch = f"{version}/{owner}/{branch_type}" + (f"/{description}" if description else "")
-    base_branch = "main" if branch_type == "release" else f"{version}/{owner}/release"
+    # Hotfixes always branch from main, others from release or main
+    base_branch = "main" if branch_type in ["release", "hotfix"] else f"{version}/{owner}/release"
     
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Creating branch {branch}"))
@@ -67,7 +69,7 @@ def create_new_branch(version, owner, branch_type, description=None):
     if not base_exists:
         stop_event.set()
         animation_thread.join()
-        print(f"{HEADING_COLOR}Error: Base branch '{base_branch}' does not exist. Create it first with 'new {version} {owner} release'.{RESET_COLOR}")
+        print(f"{HEADING_COLOR}Error: Base branch '{base_branch}' does not exist. Create it first with 'branch {version} {owner} release' or ensure 'main' exists.{RESET_COLOR}")
         sys.exit(1)
 
     run_git_command(["git", "checkout", base_branch], f"Failed to checkout {base_branch}")
