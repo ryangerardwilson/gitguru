@@ -8,16 +8,18 @@ from .git_utils import run_git_command
 from .ui import animate_loading
 from .tree import display_tree
 
+
 def validate_branch_name(branch):
     """Check if branch name follows the convention."""
     if not BRANCH_PATTERN.match(branch):
         print(f"{HEADING_COLOR}Error: Invalid branch name '{branch}'. Must be 'main' or follow <version>/<owner>/<type>[/<description>] (e.g., 0.0.1/tom/feature/test).{RESET_COLOR}")
         sys.exit(1)
 
+
 def init_git_repo(git_dir="."):
     """Initialize a new Git repository with an initial commit on main, staging all existing files."""
     os.chdir(git_dir)
-    
+
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Initializing Git repository in {git_dir}"))
     animation_thread.start()
@@ -31,7 +33,7 @@ def init_git_repo(git_dir="."):
     run_git_command(["git", "init"], "Failed to initialize Git repository")
     run_git_command(["git", "add", "."], "Failed to stage existing files")
     run_git_command(["git", "commit", "-m", "Initial commit with existing files"], "Failed to create initial commit")
-    
+
     current_branch = run_git_command(["git", "rev-parse", "--abbrev-ref", "HEAD"], "Failed to get current branch").strip()
     if current_branch != "main":
         run_git_command(["git", "branch", "-m", current_branch, "main"], "Failed to rename branch to 'main'")
@@ -40,6 +42,7 @@ def init_git_repo(git_dir="."):
     animation_thread.join()
     print(f"{CONTENT_COLOR}Git repository initialized successfully with 'main' branch in '{git_dir}', including all existing files.{RESET_COLOR}")
     display_tree(git_dir, "After Initialization")
+
 
 def create_new_branch(version, owner, branch_type, description=None):
     """Create a new branch, requiring base release branch to exist unless it's a hotfix."""
@@ -59,7 +62,7 @@ def create_new_branch(version, owner, branch_type, description=None):
     branch = f"{version}/{owner}/{branch_type}" + (f"/{description}" if description else "")
     # Hotfixes always branch from main, others from release or main
     base_branch = "main" if branch_type in ["release", "hotfix"] else f"{version}/{owner}/release"
-    
+
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Creating branch {branch}"))
     animation_thread.start()
@@ -82,11 +85,12 @@ def create_new_branch(version, owner, branch_type, description=None):
     print(f"{CONTENT_COLOR}Current branch: {current_branch}{RESET_COLOR}")
     display_tree(".", "After Branch Creation")
 
+
 def merge_branches(source, target):
     """Merge source branch into target with validation, auto-committing changes before merge."""
     validate_branch_name(source)
     validate_branch_name(target)
-    
+
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Merging {source} into {target}"))
     animation_thread.start()
@@ -105,6 +109,7 @@ def merge_branches(source, target):
     print(f"{CONTENT_COLOR}Merged '{source}' into '{target}' successfully.{RESET_COLOR}")
     display_tree(".", "After Merge")
 
+
 def commit_changes(message):
     """Commit changes with a message."""
     stop_event = threading.Event()
@@ -119,11 +124,12 @@ def commit_changes(message):
     print(f"{CONTENT_COLOR}Changes committed with message '{message}'.{RESET_COLOR}")
     display_tree(".", "After Commit")
 
+
 def push_branch():
     """Push the current branch to origin, staging and committing changes automatically."""
     current_branch = run_git_command(["git", "rev-parse", "--abbrev-ref", "HEAD"], "Failed to get current branch").strip()
     validate_branch_name(current_branch)
-    
+
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Pushing {current_branch} to origin"))
     animation_thread.start()
@@ -147,17 +153,17 @@ def push_branch():
             stop_event.set()
             animation_thread.join()
             print(f"{HEADING_COLOR}Error: No remote 'origin' configured. Please set up a remote repository first (e.g., 'git remote add origin <url>').{RESET_COLOR}")
-            display_tree(".", "Current State")
+            display_tree(".")
             sys.exit(1)
 
         # Push to origin
         run_git_command(["git", "push", "origin", current_branch], f"Failed to push {current_branch}")
-    
+
     except subprocess.CalledProcessError as e:
         stop_event.set()
         animation_thread.join()
         print(f"{HEADING_COLOR}Error: Push failed: {e.stderr}{RESET_COLOR}")
-        display_tree(".", "Current State")
+        display_tree(".")
         sys.exit(1)
 
     stop_event.set()
@@ -169,7 +175,7 @@ def push_branch():
 def switch_branch(branch):
     """Switch to an existing branch."""
     validate_branch_name(branch)
-    
+
     stop_event = threading.Event()
     animation_thread = threading.Thread(target=animate_loading, args=(stop_event, f"Switching to {branch}"))
     animation_thread.start()
@@ -180,6 +186,7 @@ def switch_branch(branch):
     animation_thread.join()
     print(f"{CONTENT_COLOR}Switched to '{branch}' successfully.{RESET_COLOR}")
     display_tree(".", "After Switch")
+
 
 def delete_branches(branches_to_delete, force=False):
     """Delete multiple branches with optional force flag."""
@@ -200,7 +207,7 @@ def delete_branches(branches_to_delete, force=False):
         if branch not in existing_branches:
             print(f"{HEADING_COLOR}Error: Branch '{branch}' does not exist.{RESET_COLOR}")
             continue
-        
+
         delete_cmd = ["git", "branch", "-D" if force else "-d", branch]
         try:
             run_git_command(delete_cmd, f"Failed to delete branch {branch}")

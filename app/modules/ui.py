@@ -3,6 +3,7 @@ import threading
 import time
 from .constants import HEADING_COLOR, CONTENT_COLOR, RESET_COLOR
 
+
 def animate_loading(stop_event, message="Processing Git command"):
     """Display a Braille spinner animation until stopped."""
     spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
@@ -14,6 +15,7 @@ def animate_loading(stop_event, message="Processing Git command"):
         time.sleep(0.1)
     sys.stdout.write(f"\r{CONTENT_COLOR}{message} Done!{RESET_COLOR}\n")
     sys.stdout.flush()
+
 
 def display_commands(script_path):
     """Display available commands."""

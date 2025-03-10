@@ -31,6 +31,7 @@ MAJOR_RELEASE_NUMBER = 0
 # UTILITY TO FIND IMPORTED PACKAGES
 ###############################################################################
 
+
 def get_imported_packages(directory):
     """Recursively find all imported packages in Python files within a directory."""
     imported_packages = set()
@@ -62,6 +63,7 @@ def get_imported_packages(directory):
 # FILTER EXTERNAL PACKAGES
 ###############################################################################
 
+
 def filter_external_packages(packages, app_dir):
     """Filter out internal modules and keep only external packages."""
     external_pkgs = set()
@@ -85,6 +87,7 @@ def filter_external_packages(packages, app_dir):
 # GENERATE LEAN REQUIREMENTS.TXT
 ###############################################################################
 
+
 def generate_lean_requirements(app_dir, output_path):
     """Generate a lean requirements.txt with only external package names."""
     imported_pkgs = get_imported_packages(app_dir)
@@ -101,6 +104,7 @@ def generate_lean_requirements(app_dir, output_path):
 ###############################################################################
 # UPDATE VERSION IN constants.py
 ###############################################################################
+
 
 def update_config_version(new_version):
     config_path = os.path.join("app", "modules", "constants.py")
@@ -123,6 +127,7 @@ def update_config_version(new_version):
 ###############################################################################
 # GET NEW VERSION
 ###############################################################################
+
 
 def get_new_version(MAJOR_RELEASE_NUMBER=None):
     config_path = os.path.expanduser("~/.rgwfuncsrc")
@@ -200,6 +205,7 @@ def get_new_version(MAJOR_RELEASE_NUMBER=None):
 # REMOVE OLD REMOTE DEBS
 ###############################################################################
 
+
 def remove_old_remote_debs():
     config_path = os.path.expanduser("~/.rgwfuncsrc")
     with open(config_path, "r", encoding="utf-8") as f:
@@ -212,7 +218,7 @@ def remove_old_remote_debs():
     ssh_user = preset["ssh_user"]
     ssh_key_path = preset["ssh_key_path"]
     remote_deb_dir = "/home/rgw/Apps/frontend-sites/files.ryangerardwilson.com/gitguru/debian/dists/stable/main/binary-amd64"
-    
+
     ssh_cmd = (
         f"ssh -i {ssh_key_path} {ssh_user}@{host} "
         f"\"[ -d {remote_deb_dir} ] && rm -f {remote_deb_dir}/gitguru_*.deb || echo 'Directory does not exist, skipping removal'\""
@@ -230,6 +236,7 @@ def remove_old_remote_debs():
 ###############################################################################
 # PUBLISH RELEASE
 ###############################################################################
+
 
 def publish_release(version):
     def build_deb(version):
@@ -426,6 +433,7 @@ PYTHONPATH=/usr/lib/gitguru/site-packages python3 /usr/lib/gitguru/app/main.py "
 # PUBLISH INSTALL SCRIPT
 ###############################################################################
 
+
 def publish_install_script():
     install_sh_contents = """#!/bin/bash
 # This installation script configures the gitguru repository and installs it system-wide
@@ -494,10 +502,12 @@ echo "Installation complete. GitGuru is now available at /usr/bin/gitguru."
     os.remove(local_install_script)
     print(f"[INFO] install.sh and pubkey.gpg published to {remote_base_path} with permissions 644")
 
+
 def main():
     new_version = get_new_version(MAJOR_RELEASE_NUMBER)
     publish_release(new_version)
     publish_install_script()
+
 
 if __name__ == "__main__":
     main()

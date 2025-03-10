@@ -11,6 +11,7 @@ from modules.branch_ops import (
 from modules.git_utils import run_git_command
 from modules.tree import display_tree
 
+
 def main():
     # Print ASCII art banner
     for line in GITGURU_BANNER.splitlines():
@@ -50,7 +51,7 @@ def main():
         if not os.path.isdir(os.path.join(git_dir, ".git")):
             print(f"{HEADING_COLOR}Error: '{git_dir}' is not a Git repository. Use 'init' to initialize one.{RESET_COLOR}")
             sys.exit(1)
-        display_tree(git_dir, "Current State")
+        display_tree(git_dir)
         sys.exit(0)
 
     # Check if it's a Git repository for all other commands
@@ -144,6 +145,7 @@ def main():
     else:
         print(f"{HEADING_COLOR}Error: Unknown command '{command}'. Try 'help' for available commands.{RESET_COLOR}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
